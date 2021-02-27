@@ -1,30 +1,34 @@
 
-cmake_minimum_required(VERSION 3.16.0)
+cmake_minimum_required(VERSION 3.3 FATAL_ERROR)
 
-PROJECT(ImageViewer VERSION 1.0.0 LANGUAGES CXX)
+if(POLICY CMP0020)
+  cmake_policy(SET CMP0020 NEW)
+  cmake_policy(SET CMP0071 NEW)
+endif()
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+PROJECT(ImageViewer)
 
 if (MSVC)
-	add_definitions( "/D_CRT_SECURE_NO_WARNINGS /MP /openmp" )
+	add_definitions( "/D_CRT_SECURE_NO_WARNINGS /wd4996 /wd4244 /wd4267 /wd4334 /MP /openmp" )
 endif(MSVC)
 
 set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 	
-find_package(Qt5 COMPONENTS Widgets Core Gui REQUIRED QUIET)
+find_package(Qt5Widgets REQUIRED QUIET)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
 file(GLOB UI_FILES src/*.ui)
-file(GLOB H_FILES src/*.h)
+file(GLOB QT_WRAP src/*.h)
 file(GLOB CXX_FILES src/*.cpp)
-file(GLOB QRC_FILES src/*.qrc)
 
-add_executable(${PROJECT_NAME} ${CXX_FILES} ${UI_FILES} ${H_FILES} ${QRC_FILES})
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt5::Widgets Qt5::Core Qt5::Gui)
+qt5_wrap_ui(UISrcs ${UI_FILES})
+
+# CMAKE_AUTOMOC in ON so the MOC headers will be automatically wrapped.
+add_executable(ImageViewer MACOSX_BUNDLE ${CXX_FILES} ${UISrcs} ${QT_WRAP})
+qt5_use_modules(ImageViewer Core Gui Widgets)
+target_link_libraries(ImageViewer)
 
 add_custom_command(TARGET ${PROJECT_NAME}
                    POST_BUILD
