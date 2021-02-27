@@ -4,6 +4,30 @@ ImageViewer::ImageViewer(QWidget* parent)
 	: QMainWindow(parent), ui(new Ui::ImageViewerClass)
 {
 	ui->setupUi(this);
+
+	qDebug() << point1 << "\n" << point2;
+
+	ui->pushButton_ColorDialog->setStyleSheet("background-color:#000000");
+	currentColor = QColor("#000000");
+	
+	openNewTabForImg(new ViewerWidget("Default window", QSize(500, 500)));
+	ui->tabWidget->setCurrentIndex(ui->tabWidget->count() - 1);
+}
+
+void ImageViewer::infoMessage(QString message)
+{
+	msgBox.setWindowTitle("Info message");
+	msgBox.setIcon(QMessageBox::Information);
+	msgBox.setText(message);
+	msgBox.exec();
+}
+
+void ImageViewer::warningMessage(QString message)
+{
+	msgBox.setWindowTitle("Warning message");
+	msgBox.setIcon(QMessageBox::Warning);
+	msgBox.setText(message);
+	msgBox.exec();
 }
 
 //ViewerWidget functions
@@ -63,7 +87,41 @@ bool ImageViewer::ViewerWidgetEventFilter(QObject* obj, QEvent* event)
 void ImageViewer::ViewerWidgetMouseButtonPress(ViewerWidget* w, QEvent* event)
 {
 	QMouseEvent* e = static_cast<QMouseEvent*>(event);
-	if (e->button() == Qt::LeftButton) {
+	if (e->button() == Qt::LeftButton)
+	{
+		if (firstPointChosen)
+		{
+			point2 = e->pos();
+			firstPointChosen = false;
+			qDebug() << "endPoint:" << point2;
+		}
+		else
+		{
+			point1 = e->pos();
+			firstPointChosen = true;
+			qDebug() << "startPoint:" << point1;
+		}
+
+		if (isPointChosen(point1) && isPointChosen(point2))
+		{
+			if (ui->comboBox_SelectShape->currentIndex() == 0)
+			{
+				if (ui->radioButton_DDA->isChecked())
+					getCurrentViewerWidget()->drawLineDDA(point1, point2, currentColor);
+				else if (ui->radioButton_Bresenham->isChecked())
+					getCurrentViewerWidget()->drawLineBresenham(point1, point2, currentColor);
+			}
+			else if (ui->comboBox_SelectShape->currentIndex() == 1)
+			{
+				getCurrentViewerWidget()->drawCircumference(point1, point2, currentColor);
+			}
+			else
+				warningMessage("invalid choice");
+
+
+			point1.setX(-1); point1.setY(-1);
+			point2.setX(-1); point2.setY(-1);
+		}
 	}
 }
 void ImageViewer::ViewerWidgetMouseButtonRelease(ViewerWidget* w, QEvent* event)
@@ -145,7 +203,10 @@ void ImageViewer::clearImage()
 void ImageViewer::setBackgroundColor(QColor color)
 {
 	ViewerWidget* w = getCurrentViewerWidget();
-	w->clear(color);
+	if (w != nullptr)
+		w->clear(color);
+	else
+		warningMessage("No image opened");
 }
 
 //Slots
@@ -254,5 +315,34 @@ void ImageViewer::on_actionSet_background_color_triggered()
 	QColor backgroundColor = QColorDialog::getColor(Qt::white, this, "Select color of background");
 	if (backgroundColor.isValid()) {
 		setBackgroundColor(backgroundColor);
+	}
+}
+
+void ImageViewer::on_pushButton_ColorDialog_clicked()
+{
+	QColor chosenColor = QColorDialog::getColor(currentColor.name(), this, "Select pen color");
+
+	if (chosenColor.isValid())
+	{
+		currentColor = chosenColor;
+		ui->pushButton_ColorDialog->setStyleSheet(QString("background-color:%1").arg(chosenColor.name()));
+	}
+	qDebug() << "chosen color:" << chosenColor;
+	qDebug() << "chosen color name:" << chosenColor.name();
+
+	
+}
+
+void ImageViewer::on_comboBox_SelectShape_currentIndexChanged(int index)
+{
+	if (index == 0)
+	{
+		if (!ui->groupBox_LineAlgorithm->isEnabled())
+			ui->groupBox_LineAlgorithm->setEnabled(true);
+	}
+	else if (index == 1)
+	{
+		if (ui->groupBox_LineAlgorithm->isEnabled())
+			ui->groupBox_LineAlgorithm->setEnabled(false);
 	}
 }

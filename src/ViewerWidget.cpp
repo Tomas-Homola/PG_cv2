@@ -77,6 +77,48 @@ void ViewerWidget::clear(QColor color)
 	update();
 }
 
+void ViewerWidget::drawLineDDA(QPoint point1, QPoint point2, QColor color)
+{
+	qDebug() << "DDA line:" << point1 << point2 << "with color:" << color.name();
+	int deltaX = qAbs(point1.x() - point2.x());
+	int deltaY = qAbs(point1.y() - point2.y());
+
+	int x = point1.x(); int y = point1.y();
+
+	if (deltaX == 0)
+	{
+		while (y != point2.y())
+		{
+			setPixel(x, y, color);
+			y++;
+		}
+	}
+	else if (deltaY == 0)
+	{
+		while (x != point2.x())
+		{
+			setPixel(x, y, color);
+			x++;
+		}
+	}
+
+	update();
+}
+
+void ViewerWidget::drawLineBresenham(QPoint point1, QPoint point2, QColor color)
+{
+	qDebug() << "Bresenham line:" << point1 << point2 << "with color:" << color.name();
+
+	update();
+}
+
+void ViewerWidget::drawCircumference(QPoint point1, QPoint point2, QColor color)
+{
+	qDebug() << "Circumference line:" << point1 << point2 << "with color:" << color.name();
+
+	update();
+}
+
 //Slots
 void ViewerWidget::paintEvent(QPaintEvent* event)
 {

@@ -37,6 +37,11 @@ public:
 
 	void clear(QColor color = Qt::white);
 
+	QPainter* getPainter() { return painter; }
+	void drawLineDDA(QPoint point1, QPoint point2, QColor color);
+	void drawLineBresenham(QPoint point1, QPoint point2, QColor color);
+	void drawCircumference(QPoint point1, QPoint point2, QColor color);
+
 public slots:
 	void paintEvent(QPaintEvent* event) Q_DECL_OVERRIDE;
 };
