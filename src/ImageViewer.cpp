@@ -5,8 +5,6 @@ ImageViewer::ImageViewer(QWidget* parent)
 {
 	ui->setupUi(this);
 
-	qDebug() << point1 << "\n" << point2;
-
 	ui->pushButton_ColorDialog->setStyleSheet("background-color:#000000");
 	currentColor = QColor("#000000");
 	
@@ -93,13 +91,13 @@ void ImageViewer::ViewerWidgetMouseButtonPress(ViewerWidget* w, QEvent* event)
 		{
 			point2 = e->pos();
 			firstPointChosen = false;
-			qDebug() << "endPoint:" << point2;
+			//qDebug() << "endPoint:" << point2;
 		}
 		else
 		{
 			point1 = e->pos();
 			firstPointChosen = true;
-			qDebug() << "startPoint:" << point1;
+			//qDebug() << "startPoint:" << point1;
 		}
 
 		if (isPointChosen(point1) && isPointChosen(point2))

@@ -1,5 +1,16 @@
 #include   "ViewerWidget.h"
 
+void ViewerWidget::swapPoints(QPoint& point1, QPoint& point2)
+{
+	int temp = point1.x();
+	point1.setX(point2.x());
+	point2.setX(temp);
+	
+	temp = point1.y();
+	point1.setY(point2.y());
+	point2.setY(temp);
+}
+
 void ViewerWidget::drawDDAHorizontalLine(QPoint point1, QPoint point2, QColor color)
 {
 	int x1 = 0;
@@ -54,6 +65,9 @@ void ViewerWidget::drawDDAVerticalLine(QPoint point1, QPoint point2, QColor colo
 
 void ViewerWidget::drawDDAChosenX(QPoint point1, QPoint point2, QColor color)
 {
+	if (point1.x() > point2.x())
+		swapPoints(point1, point2);
+	
 	double slope = (static_cast<double>(point2.y()) - static_cast<double>(point1.y())) / (static_cast<double>(point2.x()) - static_cast<double>(point1.x()));
 	
 	int x = point1.x();
@@ -74,15 +88,7 @@ void ViewerWidget::drawDDAChosenX(QPoint point1, QPoint point2, QColor color)
 void ViewerWidget::drawDDAChosenY(QPoint point1, QPoint point2, QColor color)
 {
 	if (point1.y() > point2.y())
-	{
-		int temp = point1.x();
-		point1.setX(point2.x());
-		point2.setX(temp);
-
-		temp = point1.y();
-		point1.setY(point2.y());
-		point2.setY(temp);
-	}
+		swapPoints(point1, point2);
 	
 	double slope = (static_cast<double>(point2.y()) - static_cast<double>(point1.y())) / (static_cast<double>(point2.x()) - static_cast<double>(point1.x()));
 
@@ -99,6 +105,133 @@ void ViewerWidget::drawDDAChosenY(QPoint point1, QPoint point2, QColor color)
 	}
 
 	update();
+}
+
+void ViewerWidget::drawBresenhamChosenX(QPoint point1, QPoint point2, QColor color)
+{
+	if (point1.x() > point2.x()) // ak sa klikol prvy bod viac vpravo
+		swapPoints(point1, point2);
+
+	int deltaX = point2.x() - point1.x();
+	int deltaY = point2.y() - point1.y();
+	double slope = static_cast<double>(deltaY) / static_cast<double>(deltaX);
+	int k1 = 0;
+	int k2 = 0;
+	int p = 0;
+	int x = 0;
+	int y = 0;
+
+	if (slope >= 0 && slope < 1)
+	{
+		k1 = 2 * deltaY; k2 = 2 * (deltaY - deltaX);
+		p = 2 * deltaY - deltaX;
+
+		x = point1.x(); y = point1.y();
+
+		setPixel(x, y, color);
+
+		while (x < point2.x())
+		{
+			x++;
+			if (p > 0)
+			{
+				y++;
+				p += k2;
+			}
+			else
+				p += k1;
+
+			setPixel(x, y, color);
+		}
+	}
+	else if (slope > -1 && slope <= 0)
+	{
+		k1 = 2 * deltaY; k2 = 2 * (deltaY + deltaX);
+		p = 2 * deltaY + deltaX;
+
+		x = point1.x(); y = point1.y();
+
+		setPixel(x, y, color);
+
+		while (x < point2.x())
+		{
+			x++;
+			if (p < 0)
+			{
+				y--;
+				p += k2;
+			}
+			else
+				p += k1;
+
+			setPixel(x, y, color);
+		}
+	}
+}
+
+void ViewerWidget::drawBresenhamChosenY(QPoint point1, QPoint point2, QColor color)
+{
+	if (point1.y() > point2.y()) // ak sa klikol prvy bod nizsie ako druhy bod
+		swapPoints(point1, point2);
+
+	int deltaX = point2.x() - point1.x();
+	int deltaY = point2.y() - point1.y();
+
+	double slope = static_cast<double>(deltaY) / static_cast<double>(deltaX);
+	int k1 = 0;
+	int k2 = 0;
+	int p = 0;
+	int x = 0;
+	int y = 0;
+
+	if (slope >= 1)
+	{
+		k1 = 2 * deltaX; k2 = 2 * (deltaX - deltaY);
+		p = 2 * deltaX - deltaY;
+
+		x = point1.x(); y = point1.y();
+
+		setPixel(x, y, color);
+
+		while (y < point2.y())
+		{
+			y++;
+
+			if (p > 0)
+			{
+				x++;
+				p += k2;
+			}
+			else
+				p += k1;
+
+			setPixel(x, y, color);
+		}
+	}
+	else if (slope <= -1)
+	{
+		k1 = 2 * deltaX; k2 = 2 * (deltaX + deltaY);
+		p = 2 * deltaX + deltaY;
+
+		x = point1.x(); y = point1.y();
+
+		setPixel(x, y, color);
+
+		while (y < point2.y())
+		{
+			y++;
+
+			if (p < 0)
+			{
+				x--;
+				p += k2;
+			}
+			else
+				p += k1;
+
+			setPixel(x, y, color);
+		}
+	}
 }
 
 ViewerWidget::ViewerWidget(QString viewerName, QSize imgSize, QWidget* parent)
@@ -182,19 +315,6 @@ void ViewerWidget::drawLineDDA(QPoint point1, QPoint point2, QColor color)
 {
 	char chosenAxis = 'x';
 
-	if (point1.x() > point2.x()) // ak by bol zadany prvy bod viac v pravo
-	{
-		int temp = point1.x();
-		point1.setX(point2.x());
-		point2.setX(temp);
-
-		temp = point1.y();
-		point1.setY(point2.y());
-		point2.setY(temp);
-	}
-
-	//qDebug() << "DDA\nstartPoint:" << point1 << "\nendPoint" << point2;
-
 	int deltaX = point2.x() - point1.x();
 	int deltaY = point2.y() - point1.y();
 	double slope = 0.0;
@@ -203,8 +323,6 @@ void ViewerWidget::drawLineDDA(QPoint point1, QPoint point2, QColor color)
 		drawDDAVerticalLine(point1, point2, color);
 	else // ak ten rozdiel nie je 0 -> mozme delit
 		slope = static_cast<double>(deltaY) / static_cast<double>(deltaX);
-
-	qDebug() << "slope:" << slope;
 
 	if (deltaY == 0) // ak je rozdiel y suradnic 0 -> horizontalna usecka
 	{
@@ -227,15 +345,66 @@ void ViewerWidget::drawLineDDA(QPoint point1, QPoint point2, QColor color)
 
 void ViewerWidget::drawLineBresenham(QPoint point1, QPoint point2, QColor color)
 {
-	qDebug() << "Bresenham line:" << point1 << point2 << "with color:" << color.name();
-	painter->drawLine(point1, point2);
+	int deltaX = point2.x() - point1.x();
+	int deltaY = point2.y() - point1.y();
+	double slope = static_cast<double>(deltaY) / static_cast<double>(deltaX);
+
+	if ((slope > 0 && slope < 1) || (slope > -1 && slope < 0)) // riadiaca os x
+		drawBresenhamChosenX(point1, point2, color);
+	else if ((slope > 1) || (slope < -1)) // riadiaca os y
+		drawBresenhamChosenY(point1, point2, color);
+	else
+		drawBresenhamChosenX(point1, point2, color);
+	
 	update();
 }
 
 void ViewerWidget::drawCircumference(QPoint point1, QPoint point2, QColor color)
 {
-	qDebug() << "Circumference line:" << point1 << point2 << "with color:" << color.name();
+	int deltaX = point2.x() - point1.x();
+	int deltaY = point2.y() - point1.y();
 
+	int radius = static_cast<int>(qSqrt(static_cast<double>(deltaX) * deltaX + static_cast<double>(deltaY) * deltaY));
+	int p = 1 - radius;
+	int x = 0;
+	int y = radius;
+	int dvaX = 3;
+	int dvaY = 2 * radius + 2;
+	int Sx = point1.x();
+	int Sy = point1.y();
+	int pixels = 0;
+
+	while (x <= y)
+	{
+		// pixely hore
+		if (isInside(Sx - y, Sy + x)) { setPixel(Sx - y, Sy + x, color); pixels++; }
+		if (isInside(Sx - y, Sy - x)) { setPixel(Sx - y, Sy - x, color); pixels++; }
+		
+		// pixely dole
+		if (isInside(Sx + y, Sy + x)) { setPixel(Sx + y, Sy + x, color); pixels++; }
+		if (isInside(Sx + y, Sy - x)) { setPixel(Sx + y, Sy - x, color); pixels++; }
+
+		// pixely vpravo
+		if (isInside(Sx + x, Sy - y)) { setPixel(Sx + x, Sy - y, color); pixels++; }
+		if (isInside(Sx + x, Sy + y)) { setPixel(Sx + x, Sy + y, color); pixels++; }
+
+		// pixely na lavo
+		if (isInside(Sx - x, Sy - y)) { setPixel(Sx - x, Sy - y, color); pixels++; }
+		if (isInside(Sx - x, Sy + y)) { setPixel(Sx - x, Sy + y, color); pixels++; }
+
+		if (p > 0)
+		{
+			p -= dvaY;
+			y--;
+			dvaY -= 2;
+		}
+
+		p += dvaX;
+		dvaX += 2;
+		x++;
+	}
+
+	qDebug() << "drawn pixels:" << pixels;
 	update();
 }
 

@@ -12,16 +12,29 @@ private:
 	QRgb* data = nullptr;
 	QPainter* painter = nullptr;
 
-	// kreslenie
+	// cv 2 stuff
+	void swapPoints(QPoint& point1, QPoint& point2);
+
+	// kreslenie DDA
 	void drawDDAHorizontalLine(QPoint point1, QPoint point2, QColor color);
 	void drawDDAVerticalLine(QPoint point1, QPoint point2, QColor color);
 	void drawDDAChosenX(QPoint point1, QPoint point2, QColor color);
 	void drawDDAChosenY(QPoint point1, QPoint point2, QColor color);
 
+	// kreslenie Bresenham
+	void drawBresenhamChosenX(QPoint point1, QPoint point2, QColor color);
+	void drawBresenhamChosenY(QPoint point1, QPoint point2, QColor color);
+
 public:
 	ViewerWidget(QString viewerName, QSize imgSize, QWidget* parent = Q_NULLPTR);
 	~ViewerWidget();
 	void resizeWidget(QSize size);
+
+	// cv2 funkcie
+	QPainter* getPainter() { return painter; }
+	void drawLineDDA(QPoint point1, QPoint point2, QColor color);
+	void drawLineBresenham(QPoint point1, QPoint point2, QColor color);
+	void drawCircumference(QPoint point1, QPoint point2, QColor color);
 
 	//Image functions
 	bool setImage(const QImage& inputImg);
@@ -45,11 +58,6 @@ public:
 	int getImgHeight() { return img->height(); };
 
 	void clear(QColor color = Qt::white);
-
-	QPainter* getPainter() { return painter; }
-	void drawLineDDA(QPoint point1, QPoint point2, QColor color);
-	void drawLineBresenham(QPoint point1, QPoint point2, QColor color);
-	void drawCircumference(QPoint point1, QPoint point2, QColor color);
 
 public slots:
 	void paintEvent(QPaintEvent* event) Q_DECL_OVERRIDE;
