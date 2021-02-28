@@ -91,25 +91,23 @@ void ImageViewer::ViewerWidgetMouseButtonPress(ViewerWidget* w, QEvent* event)
 		{
 			point2 = e->pos();
 			firstPointChosen = false;
-			//qDebug() << "endPoint:" << point2;
 		}
 		else
 		{
 			point1 = e->pos();
 			firstPointChosen = true;
-			//qDebug() << "startPoint:" << point1;
 		}
 
 		if (isPointChosen(point1) && isPointChosen(point2))
 		{
-			if (ui->comboBox_SelectShape->currentIndex() == 0)
+			if (ui->comboBox_SelectShape->currentIndex() == 0) // vybrana usecka
 			{
-				if (ui->radioButton_DDA->isChecked())
+				if (ui->radioButton_DDA->isChecked()) // DDA algoritmus
 					getCurrentViewerWidget()->drawLineDDA(point1, point2, currentColor);
-				else if (ui->radioButton_Bresenham->isChecked())
+				else if (ui->radioButton_Bresenham->isChecked()) // Bresenhamov algoritmus
 					getCurrentViewerWidget()->drawLineBresenham(point1, point2, currentColor);
 			}
-			else if (ui->comboBox_SelectShape->currentIndex() == 1)
+			else if (ui->comboBox_SelectShape->currentIndex() == 1) // vybrana kruznica
 			{
 				getCurrentViewerWidget()->drawCircumference(point1, point2, currentColor);
 			}
