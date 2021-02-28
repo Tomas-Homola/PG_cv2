@@ -1,5 +1,8 @@
 #pragma once
 #include <QtWidgets>
+
+#define EPSILON 0.000000001;
+
 class ViewerWidget :public QWidget {
 	Q_OBJECT
 private:
@@ -8,6 +11,12 @@ private:
 	QImage* img = nullptr;
 	QRgb* data = nullptr;
 	QPainter* painter = nullptr;
+
+	// kreslenie
+	void drawDDAHorizontalLine(QPoint point1, QPoint point2, QColor color);
+	void drawDDAVerticalLine(QPoint point1, QPoint point2, QColor color);
+	void drawDDAChosenX(QPoint point1, QPoint point2, QColor color);
+	void drawDDAChosenY(QPoint point1, QPoint point2, QColor color);
 
 public:
 	ViewerWidget(QString viewerName, QSize imgSize, QWidget* parent = Q_NULLPTR);

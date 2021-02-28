@@ -1,5 +1,106 @@
 #include   "ViewerWidget.h"
 
+void ViewerWidget::drawDDAHorizontalLine(QPoint point1, QPoint point2, QColor color)
+{
+	int x1 = 0;
+	int x2 = 0;
+	int y = point1.y();
+
+	if (point1.x() < point2.x())
+	{
+		x1 = point1.x();
+		x2 = point2.x();
+	}
+	else if (point1.x() > point2.x())
+	{
+		x1 = point2.x();
+		x2 = point1.x();
+	}
+
+	while (x1 <= x2)
+	{
+		setPixel(x1, y, color);
+		x1++;
+	}
+
+	update();
+}
+
+void ViewerWidget::drawDDAVerticalLine(QPoint point1, QPoint point2, QColor color)
+{
+	int x = point1.x();
+	int y1 = 0;
+	int y2 = 0;
+
+	if (point1.y() < point2.y())
+	{
+		y1 = point1.y();
+		y2 = point2.y();
+	}
+	else if (point1.y() > point2.y())
+	{
+		y1 = point2.y();
+		y2 = point1.y();
+	}
+
+	while (y1 <= y2)
+	{
+		setPixel(x, y1, color);
+		y1++;
+	}
+
+	update();
+}
+
+void ViewerWidget::drawDDAChosenX(QPoint point1, QPoint point2, QColor color)
+{
+	double slope = (static_cast<double>(point2.y()) - static_cast<double>(point1.y())) / (static_cast<double>(point2.x()) - static_cast<double>(point1.x()));
+	
+	int x = point1.x();
+	double y = static_cast<double>(point1.y());
+
+	setPixel(x, y, color);
+
+	while (x < point2.x())
+	{
+		x++;
+		y += slope;
+		setPixel(x, static_cast<int>(y), color);
+	}
+
+	update();
+}
+
+void ViewerWidget::drawDDAChosenY(QPoint point1, QPoint point2, QColor color)
+{
+	if (point1.y() > point2.y())
+	{
+		int temp = point1.x();
+		point1.setX(point2.x());
+		point2.setX(temp);
+
+		temp = point1.y();
+		point1.setY(point2.y());
+		point2.setY(temp);
+	}
+	
+	double slope = (static_cast<double>(point2.y()) - static_cast<double>(point1.y())) / (static_cast<double>(point2.x()) - static_cast<double>(point1.x()));
+
+	double x = static_cast<double>(point1.x());
+	int y = point1.y();
+
+	setPixel(x, y, color);
+
+	while (y < point2.y())
+	{
+		y++;
+		x += 1 / slope;
+		setPixel(static_cast<int>(x), y, color);
+	}
+
+	update();
+}
+
 ViewerWidget::ViewerWidget(QString viewerName, QSize imgSize, QWidget* parent)
 	: QWidget(parent)
 {
@@ -79,28 +180,47 @@ void ViewerWidget::clear(QColor color)
 
 void ViewerWidget::drawLineDDA(QPoint point1, QPoint point2, QColor color)
 {
-	qDebug() << "DDA line:" << point1 << point2 << "with color:" << color.name();
-	int deltaX = qAbs(point1.x() - point2.x());
-	int deltaY = qAbs(point1.y() - point2.y());
+	char chosenAxis = 'x';
 
-	int x = point1.x(); int y = point1.y();
+	if (point1.x() > point2.x()) // ak by bol zadany prvy bod viac v pravo
+	{
+		int temp = point1.x();
+		point1.setX(point2.x());
+		point2.setX(temp);
 
-	if (deltaX == 0)
-	{
-		while (y != point2.y())
-		{
-			setPixel(x, y, color);
-			y++;
-		}
+		temp = point1.y();
+		point1.setY(point2.y());
+		point2.setY(temp);
 	}
-	else if (deltaY == 0)
+
+	//qDebug() << "DDA\nstartPoint:" << point1 << "\nendPoint" << point2;
+
+	int deltaX = point2.x() - point1.x();
+	int deltaY = point2.y() - point1.y();
+	double slope = 0.0;
+
+	if (deltaX == 0) // ak je rozdiel x suradnic 0 -> vertikalna usecka
+		drawDDAVerticalLine(point1, point2, color);
+	else // ak ten rozdiel nie je 0 -> mozme delit
+		slope = static_cast<double>(deltaY) / static_cast<double>(deltaX);
+
+	qDebug() << "slope:" << slope;
+
+	if (deltaY == 0) // ak je rozdiel y suradnic 0 -> horizontalna usecka
 	{
-		while (x != point2.x())
-		{
-			setPixel(x, y, color);
-			x++;
-		}
+		drawDDAHorizontalLine(point1, point2, color);
+		update();
+		return;
 	}
+
+	if (qAbs(slope) < 1) chosenAxis = 'x';
+	else if (qAbs(slope) > 1) chosenAxis = 'y';
+	else chosenAxis = 'x';
+
+	if (chosenAxis == 'x')
+		drawDDAChosenX(point1, point2, color);
+	else if (chosenAxis == 'y')
+		drawDDAChosenY(point1, point2, color);
 
 	update();
 }
@@ -108,7 +228,7 @@ void ViewerWidget::drawLineDDA(QPoint point1, QPoint point2, QColor color)
 void ViewerWidget::drawLineBresenham(QPoint point1, QPoint point2, QColor color)
 {
 	qDebug() << "Bresenham line:" << point1 << point2 << "with color:" << color.name();
-
+	painter->drawLine(point1, point2);
 	update();
 }
 
