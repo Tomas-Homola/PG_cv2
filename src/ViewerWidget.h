@@ -31,10 +31,10 @@ public:
 	void resizeWidget(QSize size);
 
 	// cv2 funkcie
-	QPainter* getPainter() { return painter; }
 	void drawLineDDA(QPoint point1, QPoint point2, QColor color);
 	void drawLineBresenham(QPoint point1, QPoint point2, QColor color);
 	void drawCircumference(QPoint point1, QPoint point2, QColor color);
+	void drawLine(QPoint point1, QPoint point2, QColor color);
 
 	//Image functions
 	bool setImage(const QImage& inputImg);

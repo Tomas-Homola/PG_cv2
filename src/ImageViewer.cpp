@@ -5,11 +5,12 @@ ImageViewer::ImageViewer(QWidget* parent)
 {
 	ui->setupUi(this);
 
-	ui->pushButton_ColorDialog->setStyleSheet("background-color:#000000");
-	currentColor = QColor("#000000");
+	ui->pushButton_ColorDialog->setStyleSheet("background-color:#ffffff");
+	currentColor = QColor("#ffffff");
 	
 	openNewTabForImg(new ViewerWidget("Default window", QSize(500, 500)));
 	ui->tabWidget->setCurrentIndex(ui->tabWidget->count() - 1);
+	setBackgroundColor(QColor(45, 45, 45));
 }
 
 void ImageViewer::infoMessage(QString message)
@@ -106,6 +107,8 @@ void ImageViewer::ViewerWidgetMouseButtonPress(ViewerWidget* w, QEvent* event)
 					getCurrentViewerWidget()->drawLineDDA(point1, point2, currentColor);
 				else if (ui->radioButton_Bresenham->isChecked()) // Bresenhamov algoritmus
 					getCurrentViewerWidget()->drawLineBresenham(point1, point2, currentColor);
+				else if (ui->radioButton_drawLine->isChecked()) // toto je tu len na porovnanie
+					getCurrentViewerWidget()->drawLine(point1, point2, currentColor);
 			}
 			else if (ui->comboBox_SelectShape->currentIndex() == 1) // vybrana kruznica
 			{

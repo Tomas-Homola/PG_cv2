@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>990</width>
+    <width>1061</width>
     <height>646</height>
    </rect>
   </property>
@@ -25,9 +25,15 @@
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
      <widget class="QGroupBox" name="groupBox_Setting">
+      <property name="minimumSize">
+       <size>
+        <width>270</width>
+        <height>0</height>
+       </size>
+      </property>
       <property name="maximumSize">
        <size>
-        <width>260</width>
+        <width>270</width>
         <height>16777215</height>
        </size>
       </property>
@@ -189,6 +195,13 @@
                </property>
               </widget>
              </item>
+             <item>
+              <widget class="QRadioButton" name="radioButton_drawLine">
+               <property name="text">
+                <string>drawLine()</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </widget>
           </item>
@@ -246,7 +259,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>990</width>
+     <width>1061</width>
      <height>23</height>
     </rect>
    </property>

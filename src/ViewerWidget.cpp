@@ -408,6 +408,13 @@ void ViewerWidget::drawCircumference(QPoint point1, QPoint point2, QColor color)
 	update();
 }
 
+void ViewerWidget::drawLine(QPoint point1, QPoint point2, QColor color)
+{
+	QPen pen; pen.setColor(color); painter->setPen(pen);
+	painter->drawLine(point1, point2);
+	update();
+}
+
 //Slots
 void ViewerWidget::paintEvent(QPaintEvent* event)
 {
