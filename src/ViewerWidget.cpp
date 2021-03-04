@@ -313,8 +313,6 @@ void ViewerWidget::clear(QColor color)
 
 void ViewerWidget::drawLineDDA(QPoint point1, QPoint point2, QColor color)
 {
-	char chosenAxis = 'x';
-
 	int deltaX = point2.x() - point1.x();
 	int deltaY = point2.y() - point1.y();
 	double slope = 0.0;
@@ -331,14 +329,9 @@ void ViewerWidget::drawLineDDA(QPoint point1, QPoint point2, QColor color)
 		return;
 	}
 
-	if (qAbs(slope) < 1) chosenAxis = 'x';
-	else if (qAbs(slope) > 1) chosenAxis = 'y';
-	else chosenAxis = 'x';
-
-	if (chosenAxis == 'x')
-		drawDDAChosenX(point1, point2, color);
-	else if (chosenAxis == 'y')
-		drawDDAChosenY(point1, point2, color);
+	if (qAbs(slope) < 1) drawDDAChosenX(point1, point2, color);
+	else if (qAbs(slope) > 1) drawDDAChosenY(point1, point2, color);
+	else drawDDAChosenX(point1, point2, color);
 
 	update();
 }
@@ -372,25 +365,24 @@ void ViewerWidget::drawCircumference(QPoint point1, QPoint point2, QColor color)
 	int dvaY = 2 * radius + 2;
 	int Sx = point1.x();
 	int Sy = point1.y();
-	int pixels = 0;
 
 	while (x <= y)
 	{
 		// pixely hore
-		if (isInside(Sx - y, Sy + x)) { setPixel(Sx - y, Sy + x, color); pixels++; }
-		if (isInside(Sx - y, Sy - x)) { setPixel(Sx - y, Sy - x, color); pixels++; }
+		setPixel(Sx - y, Sy + x, color);
+		setPixel(Sx - y, Sy - x, color);
 		
 		// pixely dole
-		if (isInside(Sx + y, Sy + x)) { setPixel(Sx + y, Sy + x, color); pixels++; }
-		if (isInside(Sx + y, Sy - x)) { setPixel(Sx + y, Sy - x, color); pixels++; }
+		setPixel(Sx + y, Sy + x, color);
+		setPixel(Sx + y, Sy - x, color);
 
 		// pixely vpravo
-		if (isInside(Sx + x, Sy - y)) { setPixel(Sx + x, Sy - y, color); pixels++; }
-		if (isInside(Sx + x, Sy + y)) { setPixel(Sx + x, Sy + y, color); pixels++; }
+		setPixel(Sx + x, Sy - y, color);
+		setPixel(Sx + x, Sy + y, color);
 
 		// pixely na lavo
-		if (isInside(Sx - x, Sy - y)) { setPixel(Sx - x, Sy - y, color); pixels++; }
-		if (isInside(Sx - x, Sy + y)) { setPixel(Sx - x, Sy + y, color); pixels++; }
+		setPixel(Sx - x, Sy - y, color);
+		setPixel(Sx - x, Sy + y, color);
 
 		if (p > 0)
 		{
@@ -404,7 +396,6 @@ void ViewerWidget::drawCircumference(QPoint point1, QPoint point2, QColor color)
 		x++;
 	}
 
-	qDebug() << "drawn pixels:" << pixels;
 	update();
 }
 
